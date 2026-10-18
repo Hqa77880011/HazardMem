@@ -17,7 +17,7 @@ Use Python 3.11 or 3.12 and activate the environment for your shell.
 
 Obtain UCF-Crime, XD-Violence or ShanghaiTech through their dataset releases. Use one fixed causal video-feature extractor and sampling interval across all methods. Precomputed benchmark clip features can be used when their temporal support is known. A feature at time t must use frames up to t; a centered future-looking backbone window must be shifted to its final observed timestamp before entering this stream.
 
-Create `data/videos.csv` with `video,path,split,weak_label`. Each NPZ contains finite `features` of shape T×D. Training uses only video-level `weak_label` (0 normal, 1 anomalous). Test NPZs additionally contain frame/clip-aligned binary `label`, and optional binary `slow` selecting the protocol-fixed slow-event evaluation support. Never define `slow` from test model scores. Use a separate protocol for each dataset and preserve official video splits. Set `--dt` to seconds per feature; default is 0.5 seconds.
+Create `data/videos.csv` with `video,path,split,weak_label`. Feature paths are absolute or relative to the CSV's directory. Each NPZ contains finite `features` of shape T×D. Training uses only video-level `weak_label` (0 normal, 1 anomalous). Test NPZs additionally contain frame/clip-aligned binary `label`, and optional binary `slow` selecting the protocol-fixed slow-event evaluation support. Never define `slow` from test model scores. Use a separate protocol for each dataset and preserve official video splits. Set `--dt` to seconds per feature; default is 0.5 seconds.
 
 ## Fit and execute the causal controller
 
@@ -51,3 +51,15 @@ All controls share feature access, head architecture and token caps. Uniform all
 ## Modeling conventions
 
 Cosine-change boundaries and K-means states replace the unspecified lightweight event abstraction. Continuous lognormal density uses `f(d)=h(d)S(d)`, with dwell measured in seconds; it is never confused with post-bin discrete survival. Before a boundary, survival is marginalized over unknown successors. A transition's new state is first available at its observed boundary. Bounded allocation gives each active event a minimum, then uses deterministic weight-per-next-token priorities up to the maximum. When the active set is too large, low-priority events are removed while retaining the current unresolved event. These decisions preserve the causal observation and memory budget needed for a matched comparison.
+
+## Fixed reproduction setting
+
+Frozen causal features with cosine boundaries/KMeans16, normal-only grammar, 128-token memory, minimum1/maximum16 and seed0.
+
+The checked-in entry point fixes data seeds, methods, budgets and output paths. Inspect its commands without starting any computation:
+
+```bash
+python reproduce.py --plan --manifest data/manifest
+```
+
+Remove `--plan` to execute the registered pipeline in a fresh output directory. The entry point calls the existing implementation; it does not insert paper results. Installation uses the package instructions above.

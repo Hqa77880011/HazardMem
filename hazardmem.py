@@ -167,12 +167,14 @@ def main():
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
-    manifest = pd.read_csv(args.manifest)
+    manifest_path = Path(args.manifest).resolve()
+    manifest = pd.read_csv(manifest_path)
     if args.budget < args.minimum or args.maximum < args.minimum or manifest.video.duplicated().any():
         raise ValueError("Use unique videos and a feasible integer memory budget")
     records = []
     for row in manifest.itertuples():
-        with np.load(row.path, allow_pickle=False) as data:
+        feature_path = manifest_path.parent / str(row.path)
+        with np.load(feature_path, allow_pickle=False) as data:
             records.append(dict(video=str(row.video), split=row.split, weak=int(row.weak_label), **{k: data[k] for k in data.files}))
     normal = [r for r in records if r["split"] == "train" and r["weak"] == 0]
     all_normal = np.concatenate([r["features"] for r in normal])
