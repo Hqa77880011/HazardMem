@@ -54,12 +54,11 @@ Cosine-change boundaries and K-means states replace the unspecified lightweight 
 
 ## Fixed reproduction setting
 
-Frozen causal features with cosine boundaries/KMeans16, normal-only grammar, 128-token memory, minimum1/maximum16 and seed0.
-
-The checked-in entry point fixes data seeds, methods, budgets and output paths. Inspect its commands without starting any computation:
+The fixed source is a switching six-channel physical sensor process with four operating regimes, noisy periodic measurements, normal cyclic successors and abnormal skipped transitions or long dwell. There are 12 weakly labeled training sequences and eight held-out sequences (half abnormal in each role), with disjoint trajectory seeds. Per-frame truth is stored separately from the raw sensor archives.
 
 ```bash
-python reproduce.py --plan --manifest data/manifest
+python reproduce.py --plan
+python reproduce.py --output outputs/finite-setting
 ```
 
-Remove `--plan` to execute the registered pipeline in a fresh output directory. The entry point calls the existing implementation; it does not insert paper results. Installation uses the package instructions above.
+The entry point runs `finite_data.py generate --output outputs/finite-setting/raw --seed 7`, then `finite_data.py prepare --source outputs/finite-setting/raw --output outputs/finite-setting/features`. Preprocessing computes 18-dimensional current/past-window sensor statistics before copying evaluation labels. Existing HazardMem full/uniform pipelines use KMeans16, a 128-token budget, allocation 1–16, 50 MIL epochs and seed 0. This is a finite sensor-event setting; no image/video backbone is required. Optional `--manifest videos.csv` supplies other prepared sequences.
